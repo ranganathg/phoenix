@@ -19,12 +19,12 @@ package org.apache.phoenix.parse;
 
 import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.expression.Expression;
-import org.apache.phoenix.expression.LiteralExpression;
-import org.apache.phoenix.expression.function.JsonModifyFunction;
-import org.apache.phoenix.expression.function.JsonValueFunction;
 import org.apache.phoenix.expression.function.FunctionExpression;
-import org.apache.phoenix.schema.types.PJson;
+import org.apache.phoenix.expression.function.JsonModifyFunction;
+import org.apache.phoenix.expression.function.JsonQueryFunction;
+import org.apache.phoenix.expression.function.JsonValueFunction;
 import org.apache.phoenix.schema.types.PDataType;
+import org.apache.phoenix.schema.types.PJson;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -43,8 +43,10 @@ public class JsonValueParseNode extends FunctionParseNode {
         }
         if (getName().equalsIgnoreCase(JsonModifyFunction.NAME)) {
             return new JsonModifyFunction(children);
-        } else {
+        } else if(getName().equalsIgnoreCase(JsonValueFunction.NAME)) {
             return new JsonValueFunction(children);
+        } else {
+            return new JsonQueryFunction(children);
         }
     }
 }
