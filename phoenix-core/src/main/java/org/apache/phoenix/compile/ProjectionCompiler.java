@@ -47,6 +47,7 @@ import org.apache.phoenix.expression.LiteralExpression;
 import org.apache.phoenix.expression.ProjectedColumnExpression;
 import org.apache.phoenix.expression.SingleCellColumnExpression;
 import org.apache.phoenix.expression.function.ArrayIndexFunction;
+import org.apache.phoenix.expression.function.JsonValueFunction;
 import org.apache.phoenix.expression.visitor.ExpressionVisitor;
 import org.apache.phoenix.expression.visitor.ProjectedColumnExpressionVisitor;
 import org.apache.phoenix.expression.visitor.ReplaceArrayFunctionExpressionVisitor;
@@ -741,7 +742,8 @@ public class ProjectionCompiler {
         public Expression visitLeave(FunctionParseNode node, final List<Expression> children) throws SQLException {
 
             // this need not be done for group by clause with array. Hence the below check
-            if (!statement.isAggregate() && ArrayIndexFunction.NAME.equals(node.getName()) && children.get(0) instanceof ProjectedColumnExpression) {
+            if (!statement.isAggregate() && (ArrayIndexFunction.NAME.equals(node.getName())
+                    || JsonValueFunction.NAME.equals(node.getName())) && children.get(0) instanceof ProjectedColumnExpression) {
                  final List<KeyValueColumnExpression> indexKVs = Lists.newArrayList();
                  final List<ProjectedColumnExpression> indexProjectedColumns = Lists.newArrayList();
                  final List<Expression> copyOfChildren = new ArrayList<>(children);
