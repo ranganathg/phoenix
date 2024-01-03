@@ -18,6 +18,8 @@
 
 package org.apache.phoenix.iterate;
 
+import static org.apache.phoenix.expression.ExpressionType.JsonQueryFunction;
+import static org.apache.phoenix.expression.ExpressionType.JsonValueFunction;
 import static org.apache.phoenix.util.EncodedColumnsUtil.getMinMaxQualifiersFromScan;
 import static org.apache.phoenix.util.ScanUtil.getDummyResult;
 import static org.apache.phoenix.util.ScanUtil.getPageSizeMsForRegionScanner;
@@ -53,6 +55,7 @@ import org.apache.phoenix.expression.KeyValueColumnExpression;
 import org.apache.phoenix.expression.OrderByExpression;
 import org.apache.phoenix.expression.SingleCellColumnExpression;
 import org.apache.phoenix.expression.function.ArrayIndexFunction;
+import org.apache.phoenix.expression.function.ScalarFunction;
 import org.apache.phoenix.hbase.index.covered.update.ColumnReference;
 import org.apache.phoenix.hbase.index.util.ImmutableBytesPtr;
 import org.apache.phoenix.hbase.index.util.VersionUtil;
@@ -195,29 +198,29 @@ public class NonAggregateRegionScannerFactory extends RegionScannerFactory {
     private List<Expression> getServerParsedExpressions(Scan scan,
             Set<KeyValueColumnExpression> serverParsedKVRefs) {
         Expression[] serverParsedArrayFuncRefs = null;
-        if (scan.getAttribute(BaseScannerRegionObserver.SPECIFIC_ARRAY_INDEX) != null) {
+        if (scan.getAttribute(BaseScannerRegionObserverConstants.SPECIFIC_ARRAY_INDEX) != null) {
             serverParsedArrayFuncRefs =
                     deserializeServerParsedPositionalExpressionInfoFromScan(scan,
-                            BaseScannerRegionObserver.SPECIFIC_ARRAY_INDEX, serverParsedKVRefs);
+                            BaseScannerRegionObserverConstants.SPECIFIC_ARRAY_INDEX, serverParsedKVRefs);
         }
         List<Expression> resultList = new ArrayList<>();
         if (serverParsedArrayFuncRefs != null) {
             Collections.addAll(resultList, serverParsedArrayFuncRefs);
         }
         Expression[] serverParsedJsonValueFuncRefs = null;
-        if (scan.getAttribute(BaseScannerRegionObserver.JSON_VALUE_FUNCTION) != null) {
+        if (scan.getAttribute(BaseScannerRegionObserverConstants.JSON_VALUE_FUNCTION) != null) {
             serverParsedJsonValueFuncRefs =
                     deserializeServerParsedPositionalExpressionInfoFromScan(scan,
-                            BaseScannerRegionObserver.JSON_VALUE_FUNCTION, serverParsedKVRefs);
+                            BaseScannerRegionObserverConstants.JSON_VALUE_FUNCTION, serverParsedKVRefs);
         }
         if (serverParsedJsonValueFuncRefs != null) {
             Collections.addAll(resultList, serverParsedJsonValueFuncRefs);
         }
         Expression[] serverParsedJsonQueryFuncRefs = null;
-        if (scan.getAttribute(BaseScannerRegionObserver.JSON_QUERY_FUNCTION) != null) {
+        if (scan.getAttribute(BaseScannerRegionObserverConstants.JSON_QUERY_FUNCTION) != null) {
             serverParsedJsonQueryFuncRefs =
                     deserializeServerParsedPositionalExpressionInfoFromScan(scan,
-                            BaseScannerRegionObserver.JSON_QUERY_FUNCTION, serverParsedKVRefs);
+                            BaseScannerRegionObserverConstants.JSON_QUERY_FUNCTION, serverParsedKVRefs);
         }
         if (serverParsedJsonQueryFuncRefs != null) {
             Collections.addAll(resultList, serverParsedJsonQueryFuncRefs);
@@ -295,11 +298,11 @@ public class NonAggregateRegionScannerFactory extends RegionScannerFactory {
             Expression[] funcRefs = new Expression[kvFuncSize];
             for (int i = 0; i < kvFuncSize; i++) {
                 ScalarFunction func = null;
-                if (scanAttribute.equals(BaseScannerRegionObserver.SPECIFIC_ARRAY_INDEX)) {
+                if (scanAttribute.equals(BaseScannerRegionObserverConstants.SPECIFIC_ARRAY_INDEX)) {
                     func = new ArrayIndexFunction();
-                } else if (scanAttribute.equals(BaseScannerRegionObserver.JSON_VALUE_FUNCTION))  {
+                } else if (scanAttribute.equals(BaseScannerRegionObserverConstants.JSON_VALUE_FUNCTION))  {
                     func = new JsonValueFunction();
-                } else if (scanAttribute.equals(BaseScannerRegionObserver.JSON_QUERY_FUNCTION))  {
+                } else if (scanAttribute.equals(BaseScannerRegionObserverConstants.JSON_QUERY_FUNCTION))  {
                     func = new JsonQueryFunction();
                 }
                 if (func != null) {
